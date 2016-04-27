@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE, cache=TRUE)
 The data file is available in the working directory in .zip format. Let us unzip the data file and load them to the variable **df**. Once the data is loaded we shall look into the summary of the data with **str** command  
 
 
-```{r}
+```{r dataloading}
 unzip('activity.zip')
 df <- read.csv('activity.csv')
 str(df)
@@ -27,7 +27,7 @@ Now the data is loaded in the variable df. This has 3 columns. Looking into the 
 
 #### Data formatting
 
-```{r}
+```{r dataformatting}
 df$date <- as.Date(as.character(df$date), '%Y-%m-%d')
 str(df)
 ```
@@ -37,7 +37,7 @@ Here all the data fields are in the required format.
 
 #### Total number of steps taken per day
 Total steps taken per day (*tspd*) can be find by applying the **tapply** function.
-```{r}
+```{r tspd}
 tspd <- with(df, tapply(steps, date, sum, na.rm=T))
 tspd
 ```
@@ -46,7 +46,7 @@ tspd
 
 **ggplot2** has been used for all the plotting functions. So loading the library here. 
 
-```{r}
+```{r tspd_histogram}
 library(ggplot2)
 qplot(tspd, bins=12, 
       xlab = 'Total Steps per Day', 
@@ -58,7 +58,7 @@ qplot(tspd, bins=12,
 The histogram shows that the nearly for 10 days the total number of steps has been marked as 0. And the common number of steps per day is around 10000 steps which was clocked for 13 days.
 
 #### Mean & Median of tspd
-```{r}
+```{r tspd_mm}
 cat('Mean of total steps per day(tspd): ', mean(tspd))
 cat('Median of total steps per day(tspd): ', median(tspd))
 ```
@@ -70,7 +70,7 @@ mean & Median of total steps per day are Mean= `r mean(tspd)` Median=`r median(t
 
 We shall find the daily activity pattern with a line chart.
 
-```{r}
+```{r activity_pattern}
 ggplot(df, aes(interval, steps)) +
     stat_summary(fun.y = 'mean', na.rm = T, geom = 'line', color='red') +
     labs(x='5 Minutes Interval(Time in HHMM)', y='Average Steps') +
@@ -81,7 +81,7 @@ ggplot(df, aes(interval, steps)) +
 
 To see the highly active time of the day (in readable format) we can use the stringr and lubridate packages.
 
-```{r, message=FALSE}
+```{r peak_hrs, message=FALSE}
 library(stringr)
 library(lubridate)
 tspi <-tapply(df$steps, df$interval, mean, na.rm=T)
@@ -96,7 +96,7 @@ From the graph there is a huge peak in the morning hrs. Exactly at **08:35**
 
 The total number of records with missing values can be found from **complete.cases** command.
 
-```{r}
+```{r missing_records}
 table(complete.cases(df))
 ```
 This shows that our record has 2304 rows with missing values and 15264 rows will no NA values.
@@ -104,7 +104,7 @@ This shows that our record has 2304 rows with missing values and 15264 rows will
 ##### Optional:
 
 R provides more packages to do the detailed analysis on missing data and to impute them. Please install the packages added here, if you dont have already installed.
-```{r, message=FALSE}
+```{r mice, message=FALSE}
 library('mice')
 
 md.pattern(df)
@@ -113,7 +113,7 @@ This will give the detailed explaination of how the data is missing. How many ro
 
 The other package VIM - 'Visualization and Imputation of Missing Values' allows us to visualize the missing data.
 
-```{r, message=FALSE}
+```{r vim, message=FALSE}
 library('VIM')
 
 aggr_plot <- aggr(df, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE, 
@@ -125,12 +125,12 @@ Here it shows that the 13% of the steps column is having missing value(NA)
 ### Analyzing Missing Values
 
 Before filling the missing values lets do a little analysis on the steps column. Lets see the summary of the steps column. 
-```{r}
+```{r analysis_missing1}
 summary(df$steps)
 ```
 We already know that 13% of the data is having missing values. Now the **Median** of the steps column is found as 0, which means more data is have 0 as a value.
 
-```{r}
+```{r analysis_missing2}
 cat('Number of records with atleast 1 step:', 
       nrow(df[df$steps!=0 & !is.na(df$steps),]))
 ```
@@ -141,7 +141,7 @@ Since most of the records are having 0 values. We can let mice to handle the imp
 
 Let us impute the data manually. Here imputing is based on the Mean steps per interval. I have preffered to go with *interval* rather than *date* since few date have all the steps value as NA. eg: '2010-10-01'
 
-```{r}
+```{r imputing}
 df[is.na(df$steps),1] <- tapply(df$steps, df$interval, mean, na.rm=T)
 
 summary(df$steps)
@@ -150,7 +150,7 @@ summary(df$steps)
 Now we have imputed the missing values in the *steps* field.
 
 
-```{r}
+```{r imputed_tspd1}
 imputed_tspd <- tapply(df$steps, df$date, sum)
 qplot(imputed_tspd, bins=10, 
       xlab = 'Total Steps per Day', 
@@ -160,7 +160,7 @@ qplot(imputed_tspd, bins=10,
 ```
 
 Now we can see a notable change in the histogram shape. Early there was some peak at the left end of the chart. Now the histogram is almost in bell shape.
-```{r}
+```{r imputed_tspd2}
 summary(imputed_tspd)
 ```
 
@@ -170,14 +170,14 @@ The mean and median has change compared to the previous records.
 ## Are there differences in activity patterns between weekdays and weekends?
 
 To check the pattern between weekdays and weekend activities, let us extract the *daytype* from *date*.
-```{r}
+```{r daytype}
 df$daytype <- as.factor(weekdays(df$date))
 levels(df$daytype) <- list('Weekday'=c('Monday','Tuesday','Wednesday','Thursday','Friday'), 'Weekend'=c('Saturday','Sunday'))
 str(df)
 ```
 
 Plattern between the weekday and weekend activities.
-```{r}
+```{r daytype_pattern}
 g <- ggplot(data=df, aes(interval, steps)) + 
         stat_summary(fun.y = 'mean', geom = 'line', color='blue') + 
         facet_grid(facets = daytype~. ) + 

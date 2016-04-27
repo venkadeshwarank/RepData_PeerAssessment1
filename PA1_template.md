@@ -89,7 +89,7 @@ qplot(tspd, bins=12,
       )
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)
+![](PA1_template_files/figure-html/tspd_histogram-1.png)
 
 The histogram shows that the nearly for 10 days the total number of steps has been marked as 0. And the common number of steps per day is around 10000 steps which was clocked for 13 days.
 
@@ -126,7 +126,7 @@ ggplot(df, aes(interval, steps)) +
     labs(title = 'Average Daily activity timeseries pattern')
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)
+![](PA1_template_files/figure-html/activity_pattern-1.png)
 
 #### Hightly Active time of the day
 
@@ -193,7 +193,7 @@ aggr_plot <- aggr(df, col=c('navyblue','red'), numbers=TRUE, sortVars=TRUE,
                    ylab=c("Histogram of missing data","Pattern"))
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)
+![](PA1_template_files/figure-html/vim-1.png)
 
 ```
 ## 
@@ -260,7 +260,7 @@ qplot(imputed_tspd, bins=10,
       ) 
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)
+![](PA1_template_files/figure-html/imputed_tspd1-1.png)
 
 Now we can see a notable change in the histogram shape. Early there was some peak at the left end of the chart. Now the histogram is almost in bell shape.
 
@@ -305,7 +305,7 @@ g <- ggplot(data=df, aes(interval, steps)) +
 print(g)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-17-1.png)
+![](PA1_template_files/figure-html/daytype_pattern-1.png)
 
 We can find clear pattern in between weekday and the weekends.
 
